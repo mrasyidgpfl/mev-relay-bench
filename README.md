@@ -8,9 +8,9 @@ An [MEV-Boost](https://boost.flashbots.net/) relay receives bids from block buil
 every slot (12 seconds) and must serve the highest-value bid to the proposer as fast
 as possible. This tool benchmarks two storage backends for that hot path:
 
-- **BTreeMap + DashMap** - O(log n) insert, O(log n) best-bid via `last()`, good
+- **BTreeMap + DashMap**: O(log n) insert, O(log n) best-bid via `last()`, good
   general-purpose choice
-- **Sorted Vec + DashMap** - O(n) insert (binary search + shift), O(1) best-bid
+- **Sorted Vec + DashMap**: O(n) insert (binary search + shift), O(1) best-bid
   via `last()`, better cache locality
 
 Both use [DashMap](https://docs.rs/dashmap) as the outer concurrent container
@@ -33,7 +33,10 @@ cargo bench
 
 ## Findings
 
-Benchmarked on Apple M-series, Rust 1.94.1, release profile.
+**Benchmark Environment:**
+* **Hardware:** Apple M1 Pro
+* **Compiler:** Rust 1.94.1 (`--release` profile)
+* **Methodology:** Criterion.rs (single-threaded)
 
 ### Sequential insert (criterion, single-threaded)
 
@@ -63,16 +66,16 @@ Benchmarked on Apple M-series, Rust 1.94.1, release profile.
 
 ### Analysis
 
-The crossover point is around 100 concurrent builders. Below that -
+The crossover point is around 100 concurrent builders. Below that,
 which covers real-world Ethereum mainnet conditions (typically 20-60
-active builders per slot) - **SortedVec is faster for both insert and
+active builders per slot). **SortedVec is faster for both insert and
 lookup** due to cache locality. The contiguous memory layout means the
 CPU prefetcher can anticipate access patterns, while BTreeMap's
 pointer-based nodes cause cache misses on traversal.
 
 At scale (500+ bids), BTreeMap's O(log n) insert dominates because
 Vec's O(n) element shifting becomes expensive. However, `get_best`
-remains faster on SortedVec at every scale tested - `vec.last()` is
+remains faster on SortedVec at every scale tested. `vec.last()` is
 a single pointer dereference vs BTreeMap walking right-child pointers.
 
 ## What I'd build next
