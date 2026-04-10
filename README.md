@@ -36,7 +36,6 @@ cargo bench
 **Benchmark Environment:**
 * **Hardware:** Apple M1 Pro
 * **Compiler:** Rust 1.94.1 (`--release` profile)
-* **Methodology:** Criterion.rs (single-threaded)
 
 ### Sequential insert (criterion, single-threaded)
 
