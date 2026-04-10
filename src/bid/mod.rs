@@ -1,4 +1,5 @@
 pub mod btree;
+pub mod sorted_vec;
 
 use crate::types::{BidHeader, RankedBid, Slot};
 use alloy_primitives::U256;
